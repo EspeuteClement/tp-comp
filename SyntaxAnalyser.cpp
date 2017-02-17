@@ -10,12 +10,12 @@ SyntaxAnalyser::SyntaxAnalyser() {
     lex = new LexicalAnalyser();
 }
 
-void SyntaxAnalyser::decalage(LexicalAnalyser::Symbol s, State *e) {
+void SyntaxAnalyser::offset(LexicalAnalyser::Symbol s, State *e) {
     symbols.push(s);
     states.push(e);
 }
 
-void SyntaxAnalyser::reduction(int n, LexicalAnalyser::Symbol s ) {
+void SyntaxAnalyser::reduce(int n, LexicalAnalyser::Symbol s) {
     for (int i = 0; i < n; i++){
         delete(states.top());
         states.pop();

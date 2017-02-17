@@ -23,17 +23,17 @@ S0::S0(): State::State("S0"){
 
 
 bool S0::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    switch (s.tokenType){
-        case LexicalAnalyser::charToken::NUMBER :
-            syntaxAnalyser.decalage(s, new S3);
+    switch (s.type){
+        case LexicalAnalyser::symbolType::NUMBER :
+            syntaxAnalyser.offset(s, new S3);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::OPEN :
-            syntaxAnalyser.decalage(s, new S2);
+        case LexicalAnalyser::symbolType::OPEN :
+            syntaxAnalyser.offset(s, new S2);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken ::EXPR :
-            syntaxAnalyser.decalage(s, new S1);
+        case LexicalAnalyser::symbolType ::EXPR :
+            syntaxAnalyser.offset(s, new S1);
             break;
         default:
             syntaxAnalyser.syntaxError();
@@ -58,16 +58,16 @@ S1::~S1() {
 
 bool S1::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
     LexicalAnalyser::Symbol val;
-    switch (s.tokenType) {
-        case LexicalAnalyser::charToken::PLUS :
-            syntaxAnalyser.decalage(s, new S4);
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::PLUS :
+            syntaxAnalyser.offset(s, new S4);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::MULT :
-            syntaxAnalyser.decalage(s, new S5);
+        case LexicalAnalyser::symbolType::MULT :
+            syntaxAnalyser.offset(s, new S5);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::EOF_CHAR :
+        case LexicalAnalyser::symbolType::EOF_CHAR :
             // TODO : make better
             val = syntaxAnalyser.popSymbol();
             std::cout << "EOF reached, value computed : " << val.data.number;
@@ -93,17 +93,17 @@ S2::~S2() {
 }
 
 bool S2::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    switch (s.tokenType) {
-        case LexicalAnalyser::charToken::NUMBER :
-            syntaxAnalyser.decalage(s, new S3);
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::NUMBER :
+            syntaxAnalyser.offset(s, new S3);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::OPEN :
-            syntaxAnalyser.decalage(s, new S2);
+        case LexicalAnalyser::symbolType::OPEN :
+            syntaxAnalyser.offset(s, new S2);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::EXPR :
-            syntaxAnalyser.decalage(s, new S6);
+        case LexicalAnalyser::symbolType::EXPR :
+            syntaxAnalyser.offset(s, new S6);
             break;
         default:
             syntaxAnalyser.syntaxError();
@@ -124,14 +124,14 @@ S3::~S3() {
 
 bool S3::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
     LexicalAnalyser::Symbol val;
-    switch (s.tokenType) {
-        case LexicalAnalyser::charToken::PLUS :
-        case LexicalAnalyser::charToken::MULT :
-        case LexicalAnalyser::charToken::CLOSE :
-        case LexicalAnalyser::charToken::EOF_CHAR :
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::PLUS :
+        case LexicalAnalyser::symbolType::MULT :
+        case LexicalAnalyser::symbolType::CLOSE :
+        case LexicalAnalyser::symbolType::EOF_CHAR :
             val = syntaxAnalyser.popSymbol();
-            val.tokenType = LexicalAnalyser::charToken::EXPR;
-            syntaxAnalyser.reduction(1, val);
+            val.type = LexicalAnalyser::symbolType::EXPR;
+            syntaxAnalyser.reduce(1, val);
             break;
         default:
             syntaxAnalyser.syntaxError();
@@ -150,17 +150,17 @@ S4::~S4() {
 }
 
 bool S4::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    switch (s.tokenType) {
-        case LexicalAnalyser::charToken::NUMBER :
-            syntaxAnalyser.decalage(s, new S3);
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::NUMBER :
+            syntaxAnalyser.offset(s, new S3);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::OPEN :
-            syntaxAnalyser.decalage(s, new S2);
+        case LexicalAnalyser::symbolType::OPEN :
+            syntaxAnalyser.offset(s, new S2);
             syntaxAnalyser.moveCursor();
             break;
-        case LexicalAnalyser::charToken::EXPR :
-            syntaxAnalyser.decalage(s, new S7);
+        case LexicalAnalyser::symbolType::EXPR :
+            syntaxAnalyser.offset(s, new S7);
             break;
         default:
             syntaxAnalyser.syntaxError();
@@ -207,20 +207,20 @@ bool S7::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
     LexicalAnalyser::Symbol val1;
     LexicalAnalyser::Symbol val2;
     LexicalAnalyser::Symbol result;
-    switch (s.tokenType) {
-        case LexicalAnalyser::charToken::NUMBER :
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::NUMBER :
             // TODO : IMPLEMENT
             break;
-        case LexicalAnalyser::charToken::OPEN :
+        case LexicalAnalyser::symbolType::OPEN :
             // TODO : IMPLEMENT
             break;
-        case LexicalAnalyser::charToken::EOF_CHAR :
+        case LexicalAnalyser::symbolType::EOF_CHAR :
             val1 = syntaxAnalyser.popSymbol();
             syntaxAnalyser.popSymbol();
             val2 = syntaxAnalyser.popSymbol();
-            result.tokenType = LexicalAnalyser::charToken::EXPR;
+            result.type = LexicalAnalyser::symbolType::EXPR;
             result.data.number = val1.data.number + val2.data.number;
-            syntaxAnalyser.reduction(3, result);
+            syntaxAnalyser.reduce(3, result);
             break;
         default:
             syntaxAnalyser.syntaxError();

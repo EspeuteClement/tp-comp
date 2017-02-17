@@ -11,6 +11,9 @@
 
 class SyntaxAnalyser;
 
+/**
+ * Base class representing a State in our SyntaxAnalyser.
+ */
 class State {
 public:
     State (std::string name);
@@ -19,9 +22,12 @@ public:
     virtual bool transition(SyntaxAnalyser & syntaxAnalyser, LexicalAnalyser::Symbol) = 0;
 protected:
     std::string name;
-
 };
 
+/* =====================================================================
+ * We put all the states here in one file in order to gain time, sorry :(
+ * =====================================================================
+ */
 class S0: public State{
 public:
     S0 ();
