@@ -139,7 +139,8 @@ bool S3::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
             break;
     }
 
-    return true;}
+    return true;
+}
 
 S4::S4() : State("S4") {
 
@@ -180,7 +181,25 @@ S5::~S5() {
 }
 
 bool S5::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    return false;
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::NUMBER :
+            syntaxAnalyser.offset(s, new S3);
+            syntaxAnalyser.moveCursor();
+            break;
+        case LexicalAnalyser::symbolType::OPEN :
+            syntaxAnalyser.offset(s, new S2);
+            syntaxAnalyser.moveCursor();
+            break;
+        case LexicalAnalyser::symbolType::EXPR :
+            syntaxAnalyser.offset(s, new S8);
+            break;
+        default:
+            syntaxAnalyser.syntaxError();
+            return false;
+            break;
+    }
+
+    return true;
 }
 
 S6::S6() : State("S6") {
@@ -192,7 +211,26 @@ S6::~S6() {
 }
 
 bool S6::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    return false;
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::PLUS :
+            syntaxAnalyser.offset(s, new S4);
+            syntaxAnalyser.moveCursor();
+            break;
+        case LexicalAnalyser::symbolType::MULT :
+            syntaxAnalyser.offset(s, new S5);
+            syntaxAnalyser.moveCursor();
+            break;
+        case LexicalAnalyser::symbolType::CLOSE :
+            syntaxAnalyser.offset(s, new S9);
+            syntaxAnalyser.moveCursor();
+            break;
+        default:
+            syntaxAnalyser.syntaxError();
+            return false;
+            break;
+    }
+
+    return true;
 }
 
 S7::S7() : State("S7") {
@@ -208,12 +246,8 @@ bool S7::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
     LexicalAnalyser::Symbol val2;
     LexicalAnalyser::Symbol result;
     switch (s.type) {
-        case LexicalAnalyser::symbolType::NUMBER :
-            // TODO : IMPLEMENT
-            break;
-        case LexicalAnalyser::symbolType::OPEN :
-            // TODO : IMPLEMENT
-            break;
+        case LexicalAnalyser::symbolType::PLUS :
+        case LexicalAnalyser::symbolType::CLOSE :
         case LexicalAnalyser::symbolType::EOF_CHAR :
             val1 = syntaxAnalyser.popSymbol();
             syntaxAnalyser.popSymbol();
@@ -221,6 +255,10 @@ bool S7::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
             result.type = LexicalAnalyser::symbolType::EXPR;
             result.data.number = val1.data.number + val2.data.number;
             syntaxAnalyser.reduce(3, result);
+            break;
+        case LexicalAnalyser::symbolType::MULT :
+            syntaxAnalyser.offset(s, new S5);
+            syntaxAnalyser.moveCursor();
             break;
         default:
             syntaxAnalyser.syntaxError();
@@ -240,7 +278,28 @@ S8::~S8() {
 }
 
 bool S8::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    return false;
+    LexicalAnalyser::Symbol val1;
+    LexicalAnalyser::Symbol val2;
+    LexicalAnalyser::Symbol result;
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::PLUS :
+        case LexicalAnalyser::symbolType::MULT :
+        case LexicalAnalyser::symbolType::CLOSE :
+        case LexicalAnalyser::symbolType::EOF_CHAR :
+            val1 = syntaxAnalyser.popSymbol();
+            syntaxAnalyser.popSymbol();
+            val2 = syntaxAnalyser.popSymbol();
+            result.type = LexicalAnalyser::symbolType::EXPR;
+            result.data.number = val1.data.number * val2.data.number;
+            syntaxAnalyser.reduce(3, result);
+            break;
+        default:
+            syntaxAnalyser.syntaxError();
+            return false;
+            break;
+    }
+
+    return true;
 }
 
 S9::S9() : State("S9") {
@@ -252,5 +311,25 @@ S9::~S9() {
 }
 
 bool S9::transition(SyntaxAnalyser &syntaxAnalyser, LexicalAnalyser::Symbol s) {
-    return false;
+    LexicalAnalyser::Symbol val1;
+    LexicalAnalyser::Symbol result;
+    switch (s.type) {
+        case LexicalAnalyser::symbolType::PLUS :
+        case LexicalAnalyser::symbolType::MULT :
+        case LexicalAnalyser::symbolType::CLOSE :
+        case LexicalAnalyser::symbolType::EOF_CHAR :
+            syntaxAnalyser.popSymbol();
+            val1 = syntaxAnalyser.popSymbol();
+            syntaxAnalyser.popSymbol();
+            result.type = LexicalAnalyser::symbolType::EXPR;
+            result.data.number = val1.data.number;
+            syntaxAnalyser.reduce(3, result);
+            break;
+        default:
+            syntaxAnalyser.syntaxError();
+            return false;
+            break;
+    }
+
+    return true;
 }
